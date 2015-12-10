@@ -27,21 +27,28 @@ describe('Sinon: spy', function () {
   it('spy callCount etc', function () {
     var cb = sandbox.spy();
 
-    cb();
-    cb();
+    cb({ name: 'tubitv', type: 'video' });
+    cb(2, 4);
     cb(3);
 
+    // called times
     assert(cb.calledThrice, '`cb` should only be called 3 times');
     assert.equal(cb.callCount, 3, '`cb` should only be called 3 times');
 
     // the last call of spy function
-    // equal to:
-    // let lastCall = cb.getCall(3);
-    let lastCall = cb.lastCall;
+    // const lastCall = cb.getCall(3);
+    const lastCall = cb.lastCall;
     assert.equal(lastCall.args[0], 3, 'received args when called');
 
-    // calledOn - has been called with
-    assert.isFalse(cb.calledOn(2), 'Has been called with');
+    // check called arguments with calledWith - has been called with
+    assert.isBelow(cb.withArgs(3).callCount, 2, 'Called with 3 for one time');
+    assert.ok(cb.calledWith(), 'Has been called with undefined');
+    assert.ok(cb.calledWith(2), 'Has been called with 2, with other arguments, here 4');
+    assert.isFalse(cb.calledWith(4), 'Called with 4');
+    assert.notOk(cb.calledWithExactly(2), 'Has been called with undefined');
+    assert.notOk(cb.alwaysCalledWith(3), 'Always called with');
+    // http://sinonjs.org/docs/#matchers
+    assert.ok(cb.calledWithMatch({ type: 'video' }), 'Arguments contain property');
   });
 
   it('spy: spy existing functions/methods', function () {
@@ -54,11 +61,17 @@ describe('Sinon: spy', function () {
     let spy = sandbox.spy(myFun);
     spy();
 
-    const method = sandbox.spy(Array.prototype, 'join');
+    assert(spy.returned(str), `Spy should returned : ${str}`);
+
+    const split = sandbox.spy(String.prototype, 'split');
+    const join = sandbox.spy(Array.prototype, 'join');
     const result = str.split(' ').join('_');
 
-    assert(spy.returned(str), `Spy should returned : ${str}`);
-    assert.equal(method.returnValues[0], result, `Check returned value`);
+    // check `this` value when function is called
+    assert(split.calledOn(str), 'Should have been called with * as this');
+
+    // return values array
+    assert.equal(join.returnValues[0], result, `Check returned value`);
   });
 });
 
