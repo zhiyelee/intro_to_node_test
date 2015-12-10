@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "test": "ava"
+  },
+  "dependencies": {
+    "ava": "^0.7.0",
+    "express": "^4.13.3",
+    "supertest": "^1.1.0"
+  }
+}
